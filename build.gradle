@@ -1,88 +1,158 @@
 plugins {
-    id 'fabric-loom' version "${fabric_loom_version}" apply false
+    id 'net.minecraftforge.gradle' version '5.1.+'
+    id "org.spongepowered.mixin" version "0.7.+"
+    id 'com.matthewprenger.cursegradle' version "${cursegradle_version}"
+    id 'com.github.johnrengelman.shadow' version "${shadow_version}"
+    id 'maven-publish'
 }
 
-tasks.register('cloneJcef', Exec) {
-    commandLine 'git', 'submodule', 'update', '--init', '--recursive', 'common/java-cef'
-}
+var mod_version = mcef_version
 
-// https://gist.github.com/JonasGroeger/7620911
-def getCheckedOutGitCommitHash(Project mcefParent) {
-    def gitFolder = "$mcefParent.projectDir/.git/modules/common/java-cef/"
-    def takeFromHash = 40
-    /*
-     * '.git/HEAD' contains either
-     *      in case of detached head: the currently checked out commit hash
-     *      otherwise: a reference to a file containing the current commit hash
-     */
-    def gitHeadFile = new File(gitFolder + "HEAD");
-    if (gitHeadFile.exists()) {
-        def head = gitHeadFile.text.split(":") // .git/HEAD
-        def isCommit = head.length == 1 // e5a7c79edabbf7dd39888442df081b1c9d8e88fd
-        // def isRef = head.length > 1     // ref: refs/heads/master
+archivesBaseName = project.archives_base_name
+version = mod_version
+group = mod_packagename
 
-        if (isCommit) return head[0].trim().take(takeFromHash) // e5a7c79edabb
+java.toolchain.languageVersion = JavaLanguageVersion.of(java_version as int)
 
-        def refHead = new File(gitFolder + head[1].trim()) // .git/refs/heads/master
-        refHead.text.trim().take takeFromHash
-    } else {
-        return ""
+minecraft {
+    mappings channel: 'official', version: minecraft_version
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.console.level', 'debug'
+        }
+        server {
+            workingDirectory project.file('run/server')
+            property 'forge.logging.console.level', 'debug'
+            arg '--nogui'
+        }
     }
 }
 
-tasks.register('publishMaven', GradleBuild) {
-    group = 'mcef'
-    tasks = [
-          ':common:publish',
-          ':fabric:publish',
-          ':forge:publish'
-    ]
+mixin {
+    add sourceSets.main, 'mcef.refmap.json'
+    config 'mcef.mixins.json'
 }
 
-tasks.register('publishCurseforge', GradleBuild) {
-    group = 'mcef'
-    tasks = [
-            ':common:clean',
-            ':forge:clean',
-            ':fabric:clean',
-            ':forge:curseforge',
-            ':fabric:curseforge'
-    ]
+sourceSets {
+    jcef {
+        java {
+            srcDir "java-cef/java"
+            exclude "**/tests/**"
+        }
+    }
+
+    main {
+        compileClasspath += jcef.output
+        runtimeClasspath += jcef.output
+    }
 }
 
-tasks.register('fabricClient', GradleBuild) {
-    group = 'mcef'
-    tasks = [
-          ':fabric:runClient'
-    ]
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+processResources.dependsOn(processJcefResources)
+
+configurations {
+    shadowMc.extendsFrom minecraftLibrary
 }
 
-tasks.register('forgeClient', GradleBuild) {
-    group = 'mcef'
-    tasks = [
-          ':forge:runClient'
-    ]
+tasks.register('prepareWorkspace') {
+
 }
 
-tasks.register('fabricServer', GradleBuild) {
-    group = 'mcef'
-    tasks = [
-          ':fabric:runServer'
-    ]
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    implementation(project(':common')) {
+        transitive false
+    }
+
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 
-tasks.register('forgeServer', GradleBuild) {
-    group = 'mcef'
-    tasks = [
-          ':forge:runServer'
-    ]
+tasks.register('generateJava', Copy) {
+    from project(':common').file('src/template/java')
+    into "${buildDir}/generated/java"
+    expand 'compatibility_version': mod_compatibility_version
+}
+sourceSets.main.java {
+    srcDir "${buildDir}/generated/java"
+}
+compileJava.dependsOn generateJava
+
+processResources {
+    filesMatching('**/*.toml') {
+        expand 'mod_id': mod_id,
+                'mod_version': mod_version,
+                'mod_name': mod_name,
+                'forge_loader_requirement': forge_loader_requirement,
+                'forge_requirement': forge_requirement,
+                'minecraft_version': minecraft_version
+    }
+    from("${project(':common').projectDir}/src/main/resources")
 }
 
-tasks.register('cleanAll', GradleBuild) {
-    group = 'mcef'
-    tasks = [
-          ':common:clean',
-          ':fabric:clean',
-          ':forge:clean',
-    ]
+tasks.withType(JavaCompile).configureEach {
+    source(project(':common').sourceSets.main.allSource)
+    source(project(':common').sourceSets.jcef.allSource)
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+jar {
+    from sourceSets.jcef.output.classesDirs
+    from sourceSets.jcef.output.resourcesDir
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes(['Specification-Title'     : mod_name,
+                    'Specification-Vendor'    : mod_vendor,
+                    'Specification-Version'   : "1",
+                    'Implementation-Title'    : mod_name,
+                    'Implementation-Version'  : mod_version,
+                    'Implementation-Vendor'   : mod_vendor,
+                    'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                    'java-cef-commit'         : project.parent.getCheckedOutGitCommitHash(project.parent)
+        ])
+    }
+    from configurations.shadow.collect { it.isDirectory() ? it : zipTree(it) }
+}
+
+tasks.register('deobfJar', Jar) {
+    archiveClassifier = 'deobf'
+    from sourceSets.main.output
+}
+
+curseforge {
+    apiKey = file("${rootDir}/curseforge_api_key.txt").exists() ? file("${rootDir}/curseforge_api_key.txt").text : ''
+    project {
+        id = curse_id
+        releaseType = release_type
+        addGameVersion minecraft_version
+        addGameVersion 'Forge'
+        addGameVersion 'NeoForge'
+        addGameVersion "Java ${java_version}"
+        mainArtifact(jar) {
+            displayName = "[FORGE][${minecraft_version}] ${mod_name} ${mod_version}"
+        }
+    }
+}
+
+jar.finalizedBy('reobfJar')
+
+shadowJar {
+    configurations = [project.configurations.shadowMc]
+    archiveClassifier = ''
+}
+shadowJar.dependsOn('reobfJar')
+
+reobf {
+    shadowJar {}
+}
+
+artifacts {
+    archives deobfJar
 }
