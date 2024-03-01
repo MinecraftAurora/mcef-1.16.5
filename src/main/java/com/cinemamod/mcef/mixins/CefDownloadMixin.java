@@ -41,7 +41,7 @@ import java.io.IOException;
  * /path/to/.minecraft/mods/mcef-libraries.
  * <p>
  * jcef.path is the location of the standard java-cef bundle. By default,
- * /path/to/mcef-libraries/<normalized platform name> where normalized platform name comes from
+ * /path/to/mcef-libraries/[normalized platform name] where normalized platform name comes from
  * {@link MCEFPlatform#getNormalizedName()}. This is what java-cef uses internally to find the
  * installation. Also see {@link org.cef.CefApp}.
  */

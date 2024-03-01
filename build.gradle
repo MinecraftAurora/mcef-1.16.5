@@ -12,7 +12,11 @@ archivesBaseName = project.archives_base_name
 version = mod_version
 group = mod_packagename
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(java_version as int)
+java {
+    withJavadocJar()
+    withSourcesJar()
+    toolchain.languageVersion = JavaLanguageVersion.of(java_version as int)
+}
 
 def getCheckedOutGitCommitHash() {
     def gitFolder = "java-cef/.git/modules/common/java-cef/"
@@ -144,4 +148,32 @@ reobf {
 
 artifacts {
     archives deobfJar
+}
+
+publishing {
+    publications {
+        mcef(MavenPublication){
+            from components.java
+            artifactId "mcef"
+        }
+
+        mcefDeobf(MavenPublication){
+            artifactId "mcef-deobf"
+            artifact ("/build/libs/mcef-forge-" + version + "-deobf.jar")
+            artifact sourcesJar
+            artifact javadocJar
+        }
+    }
+
+    repositories {
+        maven {
+            name = "repsy"
+            credentials{
+                username repsyUsername
+                password repsyPassword
+            }
+
+            url = 'https://repo.repsy.io/mvn/javaracing/mcef'
+        }
+    }
 }

@@ -42,7 +42,7 @@ import static org.lwjgl.opengl.GL11.*;
 /**
  * An instance of an "Off-screen rendered" Chromium web browser.
  * Complete with a renderer, keyboard and mouse inputs, optional
- * browser control shortcuts, cursor handling, drag & drop support.
+ * browser control shortcuts, cursor handling, drag and drop support.
  */
 public class MCEFBrowser extends CefBrowserOsr {
     /**
