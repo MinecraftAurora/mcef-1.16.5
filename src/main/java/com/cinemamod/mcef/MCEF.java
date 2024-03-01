@@ -217,8 +217,8 @@ public final class MCEF {
         }
 
         // Try to get from the git submodule (if loading from development environment)
-        ProcessBuilder processBuilder = new ProcessBuilder("git", "submodule", "status", "common/java-cef");
-        processBuilder.directory(new File("../../"));
+        ProcessBuilder processBuilder = new ProcessBuilder("git", "submodule", "status", "java-cef");
+        processBuilder.directory(new File("../"));
         Process process = processBuilder.start();
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
