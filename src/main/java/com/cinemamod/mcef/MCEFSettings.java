@@ -45,7 +45,7 @@ public class MCEFSettings {
 
     public MCEFSettings() {
         skipDownload = false;
-        downloadMirror = "https://mcef-download.cinemamod.com";
+        downloadMirror = "https://files.javaracing.de";
         userAgent = null;
         useCache = true;
     }
