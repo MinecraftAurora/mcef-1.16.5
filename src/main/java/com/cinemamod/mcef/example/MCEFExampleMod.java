@@ -20,10 +20,9 @@
 
 package com.cinemamod.mcef.example;
 
-import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import org.lwjgl.glfw.GLFW;
@@ -31,8 +30,8 @@ import org.lwjgl.glfw.GLFW;
 public class MCEFExampleMod {
     private static final Minecraft minecraft = Minecraft.getInstance();
 
-    public static final KeyMapping KEY_MAPPING = new KeyMapping(
-            "Open Browser", InputConstants.Type.KEYSYM,
+    public static final KeyBinding KEY_MAPPING = new KeyBinding(
+            "Open Browser",
             GLFW.GLFW_KEY_F10, "key.categories.misc"
     );
 
@@ -45,7 +44,7 @@ public class MCEFExampleMod {
         if (KEY_MAPPING.isDown() && !(minecraft.screen instanceof ExampleScreen)) {
             // Display the ExampleScreen web browser
             minecraft.setScreen(new ExampleScreen(
-                    Component.literal("Example Screen")
+                    new StringTextComponent("Example Screen")
             ));
         }
     }

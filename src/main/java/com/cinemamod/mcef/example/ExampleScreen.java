@@ -22,23 +22,24 @@ package com.cinemamod.mcef.example;
 
 import com.cinemamod.mcef.MCEF;
 import com.cinemamod.mcef.MCEFBrowser;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.text.ITextComponent;
+import org.lwjgl.opengl.GL11;
+
+import javax.annotation.Nonnull;
 
 public class ExampleScreen extends Screen {
     private static final int BROWSER_DRAW_OFFSET = 20;
 
     private MCEFBrowser browser;
 
-    protected ExampleScreen(Component component) {
+    protected ExampleScreen(ITextComponent component) {
         super(component);
     }
 
@@ -88,20 +89,22 @@ public class ExampleScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-        super.render(guiGraphics, i, j, f);
+    @SuppressWarnings("deprecation")
+    public void render(@Nonnull MatrixStack ms, int i, int j, float f) {
+        super.render(ms, i, j, f);
         RenderSystem.disableDepthTest();
-        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-        RenderSystem.setShaderTexture(0, browser.getRenderer().getTextureID());
-        Tesselator t = Tesselator.getInstance();
+        // TODO: Check Line:
+        // RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+        RenderSystem.bindTexture(browser.getRenderer().getTextureID());
+        Tessellator t = Tessellator.getInstance();
         BufferBuilder buffer = t.getBuilder();
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
         buffer.vertex(BROWSER_DRAW_OFFSET, height - BROWSER_DRAW_OFFSET, 0).uv(0.0f, 1.0f).color(255, 255, 255, 255).endVertex();
         buffer.vertex(width - BROWSER_DRAW_OFFSET, height - BROWSER_DRAW_OFFSET, 0).uv(1.0f, 1.0f).color(255, 255, 255, 255).endVertex();
         buffer.vertex(width - BROWSER_DRAW_OFFSET, BROWSER_DRAW_OFFSET, 0).uv(1.0f, 0.0f).color(255, 255, 255, 255).endVertex();
         buffer.vertex(BROWSER_DRAW_OFFSET, BROWSER_DRAW_OFFSET, 0).uv(0.0f, 0.0f).color(255, 255, 255, 255).endVertex();
         t.end();
-        RenderSystem.setShaderTexture(0, 0);
+        RenderSystem.bindTexture(0);
         RenderSystem.enableDepthTest();
     }
 
