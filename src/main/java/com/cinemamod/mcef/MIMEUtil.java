@@ -10,44 +10,64 @@ public final class MIMEUtil {
 //            return ret;
 
         // If the mimeTypeMap couldn't be loaded, fall back to common things
-        return switch (ext) {
-            case "htm", "html" -> "text/html";
-            case "css" -> "text/css";
-            case "pdf" -> "application/pdf";
-            case "xz" -> "application/x-xz";
-            case "tar" -> "application/x-tar";
-            case "cpio" -> "application/x-cpio";
-            case "7z" -> "application/x-7z-compressed";
-            case "zip" -> "application/zip";
-            case "js" -> "text/javascript";
-            case "json" -> "application/json";
-            case "jsonml" -> "application/jsonml+json";
-            case "jar" -> "application/java-archive";
-            case "ser" -> "application/java-serialized-object";
-            case "class" -> "application/java-vm";
-            case "wad" -> "application/x-doom";
-            case "png" -> "image/png";
-            case "jpg", "jpeg" -> "image/jpeg";
-            case "gif" -> "image/gif";
-            case "svg" -> "image/svg+xml";
-            case "xml" -> "text/xml";
-            case "txt" -> "text/plain";
-            case "oga", "ogg", "spx" -> "audio/ogg";
-            case "mp4", "mp4v", "mpg4" -> "video/mp4";
-            case "m4a", "mp4a" -> "audio/mp4";
-            case "mid", "midi", "kar", "rmi" -> "audio/midi";
-            case "mpga", "mp2", "mp2a", "mp3", "mp3a", "m2a" -> "audio/mpeg";
-            case "mpeg", "mpg", "mpe", "m1v", "m2v" -> "video/mpeg";
-            case "jpgv" -> "video/jpeg";
-            case "h264" -> "video/h264";
-            case "h261" -> "video/h261";
-            case "h263" -> "video/h263";
-            case "webm" -> "video/webm";
-            case "flv" -> "video/flv";
-            case "m4v" -> "video/m4v";
-            case "qt", "mov" -> "video/quicktime";
-            case "ogv" -> "video/ogg";
-            default -> null;
-        };
+        switch (ext) {
+            case "htm":
+            case "html": return "text/html";
+            case "css": return "text/css";
+            case "pdf": return "application/pdf";
+            case "xz": return "application/x-xz";
+            case "tar": return "application/x-tar";
+            case "cpio": return "application/x-cpio";
+            case "7z": return "application/x-7z-compressed";
+            case "zip": return "application/zip";
+            case "js": return "text/javascript";
+            case "json": return "application/json";
+            case "jsonml": return "application/jsonml+json";
+            case "jar": return "application/java-archive";
+            case "ser": return "application/java-serialized-object";
+            case "class": return "application/java-vm";
+            case "wad": return "application/x-doom";
+            case "png": return "image/png";
+            case "jpg":
+            case "jpeg": return "image/jpeg";
+            case "gif": return "image/gif";
+            case "svg": return "image/svg+xml";
+            case "xml": return "text/xml";
+            case "txt": return "text/plain";
+            case "oga":
+            case "ogg":
+            case "spx": return "audio/ogg";
+            case "mp4":
+            case "mp4v":
+            case "mpg4": return"video/mp4";
+            case "m4a":
+            case "mp4a": return "audio/mp4";
+            case "mid":
+            case "midi":
+            case "kar":
+            case "rmi": return "audio/midi";
+            case "mpga":
+            case "mp2":
+            case "mp2a":
+            case "mp3":
+            case "mp3a":
+            case "m2a": return "audio/mpeg";
+            case "mpeg":
+            case "mpg":
+            case "mpe":
+            case "m1v":
+            case "m2v": return "video/mpeg";
+            case "jpgv": return "video/jpeg";
+            case "h264": return "video/h264";
+            case "h261": return "video/h261";
+            case "h263": return "video/h263";
+            case "webm": return "video/webm";
+            case "flv": return "video/flv";
+            case "m4v": return "video/m4v";
+            case "qt":
+            case "mov": return "video/quicktime";
+            case "ogv": return "video/ogg";
+            default: return null;
+        }
     }
 }

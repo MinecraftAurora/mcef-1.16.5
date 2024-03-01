@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * An API to create Chromium web browsers in Minecraft. Uses
@@ -196,22 +197,23 @@ public final class MCEF {
         }
 
         // Try to get from resources (if loading from a jar)
-        Enumeration<URL> resources = MCEF.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
+
         Map<String, String> commits = new HashMap<>(1);
-        resources.asIterator().forEachRemaining(resource -> {
+        for (Enumeration<URL> resources = MCEF.class.getClassLoader().getResources("META-INF/MANIFEST.MF"); resources.hasMoreElements();){
+            URL url = resources.nextElement();
             Properties properties = new Properties();
             try {
-                properties.load(resource.openStream());
+                properties.load(url.openStream());
                 if (properties.containsKey("java-cef-commit")) {
-                    commits.put(resource.getFile(), properties.getProperty("java-cef-commit"));
+                    commits.put(url.getFile(), properties.getProperty("java-cef-commit"));
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        });
+        }
 
         if (!commits.isEmpty()) {
-            return commits.get(commits.keySet().stream().toList().get(0));
+            return commits.get(new ArrayList<>(commits.keySet()).get(0));
         }
 
         // Try to get from the git submodule (if loading from development environment)
