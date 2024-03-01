@@ -14,6 +14,30 @@ group = mod_packagename
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(java_version as int)
 
+def getCheckedOutGitCommitHash() {
+    def gitFolder = "java-cef/.git/modules/common/java-cef/"
+    def takeFromHash = 40
+    /*
+     * '.git/HEAD' contains either
+     *      in case of detached head: the currently checked out commit hash
+     *      otherwise: a reference to a file containing the current commit hash
+     */
+    def gitHeadFile = new File(gitFolder + "HEAD");
+    if (gitHeadFile.exists()) {
+        def head = gitHeadFile.text.split(":") // .git/HEAD
+        def isCommit = head.length == 1 // e5a7c79edabbf7dd39888442df081b1c9d8e88fd
+        // def isRef = head.length > 1     // ref: refs/heads/master
+
+        if (isCommit) return head[0].trim().take(takeFromHash) // e5a7c79edabb
+
+        def refHead = new File(gitFolder + head[1].trim()) // .git/refs/heads/master
+        refHead.text.trim().take takeFromHash
+    } else {
+        return ""
+    }
+}
+
+
 minecraft {
     mappings channel: 'official', version: minecraft_version
 
@@ -64,22 +88,8 @@ tasks.register('prepareWorkspace') {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    implementation(project(':common')) {
-        transitive false
-    }
-
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
-
-tasks.register('generateJava', Copy) {
-    from project(':common').file('src/template/java')
-    into "${buildDir}/generated/java"
-    expand 'compatibility_version': mod_compatibility_version
-}
-sourceSets.main.java {
-    srcDir "${buildDir}/generated/java"
-}
-compileJava.dependsOn generateJava
 
 processResources {
     filesMatching('**/*.toml') {
@@ -90,12 +100,6 @@ processResources {
                 'forge_requirement': forge_requirement,
                 'minecraft_version': minecraft_version
     }
-    from("${project(':common').projectDir}/src/main/resources")
-}
-
-tasks.withType(JavaCompile).configureEach {
-    source(project(':common').sourceSets.main.allSource)
-    source(project(':common').sourceSets.jcef.allSource)
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -115,7 +119,7 @@ jar {
                     'Implementation-Version'  : mod_version,
                     'Implementation-Vendor'   : mod_vendor,
                     'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                    'java-cef-commit'         : project.parent.getCheckedOutGitCommitHash(project.parent)
+                    'java-cef-commit'         : project.getCheckedOutGitCommitHash()
         ])
     }
     from configurations.shadow.collect { it.isDirectory() ? it : zipTree(it) }
@@ -124,21 +128,6 @@ jar {
 tasks.register('deobfJar', Jar) {
     archiveClassifier = 'deobf'
     from sourceSets.main.output
-}
-
-curseforge {
-    apiKey = file("${rootDir}/curseforge_api_key.txt").exists() ? file("${rootDir}/curseforge_api_key.txt").text : ''
-    project {
-        id = curse_id
-        releaseType = release_type
-        addGameVersion minecraft_version
-        addGameVersion 'Forge'
-        addGameVersion 'NeoForge'
-        addGameVersion "Java ${java_version}"
-        mainArtifact(jar) {
-            displayName = "[FORGE][${minecraft_version}] ${mod_name} ${mod_version}"
-        }
-    }
 }
 
 jar.finalizedBy('reobfJar')
