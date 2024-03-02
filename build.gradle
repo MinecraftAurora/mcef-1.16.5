@@ -123,6 +123,7 @@ jar {
 tasks.register('deobfJar', Jar) {
     archiveClassifier = 'deobf'
     from sourceSets.main.output
+    from sourceSets.jcef.output
 }
 
 jar.finalizedBy('reobfJar')
