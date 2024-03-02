@@ -81,14 +81,6 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 processResources.dependsOn(processJcefResources)
 
-configurations {
-    shadowMc.extendsFrom minecraftLibrary
-}
-
-tasks.register('prepareWorkspace') {
-
-}
-
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
@@ -126,7 +118,6 @@ jar {
                     'java-cef-commit'         : project.getCheckedOutGitCommitHash()
         ])
     }
-    from configurations.shadow.collect { it.isDirectory() ? it : zipTree(it) }
 }
 
 tasks.register('deobfJar', Jar) {
@@ -135,16 +126,6 @@ tasks.register('deobfJar', Jar) {
 }
 
 jar.finalizedBy('reobfJar')
-
-shadowJar {
-    configurations = [project.configurations.shadowMc]
-    archiveClassifier = ''
-}
-shadowJar.dependsOn('reobfJar')
-
-reobf {
-    shadowJar {}
-}
 
 artifacts {
     archives deobfJar
