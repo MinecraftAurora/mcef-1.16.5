@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="${forge_loader_requirement}"
+loaderVersion="[36,)"
 license="LGPL"
 issueTrackerURL="https://github.com/CinemaMod/mcef/issues"
 displayURL="https://github.com/CinemaMod/mcef"
@@ -7,21 +7,20 @@ logoFile="icon.png"
 # credits=""
 authors="ds58"
 [[mods]]
-modId="${mod_id}"
+modId="mcef"
 version="${mod_version}"
 displayName="${mod_name}"
 updateJSONURL=""
-displayTest="NONE"
 description='''A Minecraft mod and library for adding the Chromium web browser into the game (Minecraft Chromium Embedded Framework).'''
-[[dependencies.${mod_id}]]
+[[dependencies.mcef]]
     modId="forge"
     mandatory=true
-    versionRange="${forge_requirement}"
+    versionRange="[36,)"
     ordering="NONE"
     side="BOTH"
-[[dependencies.${mod_id}]]
+[[dependencies.mcef]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.16.5,)"
+    versionRange="[1.16.5,1.17)"
     ordering="NONE"
     side="BOTH"

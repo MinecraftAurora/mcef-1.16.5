@@ -18,30 +18,6 @@ java {
     toolchain.languageVersion = JavaLanguageVersion.of(java_version as int)
 }
 
-def getCheckedOutGitCommitHash() {
-    def gitFolder = "java-cef/.git/modules/common/java-cef/"
-    def takeFromHash = 40
-    /*
-     * '.git/HEAD' contains either
-     *      in case of detached head: the currently checked out commit hash
-     *      otherwise: a reference to a file containing the current commit hash
-     */
-    def gitHeadFile = new File(gitFolder + "HEAD");
-    if (gitHeadFile.exists()) {
-        def head = gitHeadFile.text.split(":") // .git/HEAD
-        def isCommit = head.length == 1 // e5a7c79edabbf7dd39888442df081b1c9d8e88fd
-        // def isRef = head.length > 1     // ref: refs/heads/master
-
-        if (isCommit) return head[0].trim().take(takeFromHash) // e5a7c79edabb
-
-        def refHead = new File(gitFolder + head[1].trim()) // .git/refs/heads/master
-        refHead.text.trim().take takeFromHash
-    } else {
-        return ""
-    }
-}
-
-
 minecraft {
     mappings channel: 'official', version: minecraft_version
 
@@ -115,7 +91,7 @@ jar {
                     'Implementation-Version'  : mod_version,
                     'Implementation-Vendor'   : mod_vendor,
                     'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                    'java-cef-commit'         : project.getCheckedOutGitCommitHash()
+                    'java-cef-commit'         : "d5e3cece98755ff1e5af39261e6a486a5d9adb5d"
         ])
     }
 }

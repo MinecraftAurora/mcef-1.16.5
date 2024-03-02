@@ -22,10 +22,10 @@ package com.cinemamod.mcef;
 
 import com.cinemamod.mcef.listeners.MCEFInitListener;
 import net.minecraft.client.Minecraft;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cef.misc.CefCursorType;
 import org.lwjgl.glfw.GLFW;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -33,14 +33,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * An API to create Chromium web browsers in Minecraft. Uses
  * a modified version of java-cef (Java Chromium Embedded Framework).
  */
 public final class MCEF {
-    public static final Logger LOGGER = LoggerFactory.getLogger("MCEF");
+    public static final Logger LOGGER = LogManager.getLogger("MCEF");
     private static MCEFSettings settings;
     private static MCEFApp app;
     private static MCEFClient client;
